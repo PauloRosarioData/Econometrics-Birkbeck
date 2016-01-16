@@ -12,10 +12,10 @@ library("vars")
 
 #Load the data series
 
-BPI <- read.csv("C:/Users/prosario/Documents/MScThesis/BPI_quotes.csv")
-BES <- read.csv("C:/Users/prosario/Documents/MScThesis/BES_quotes.csv")
-BCP <- read.csv("C:/Users/prosario/Documents/MScThesis/BCP_quotes.csv")
-BANIF <- read.csv("C:/Users/prosario/Documents/MScThesis/BANIF_quotes.csv")
+BPI <- read.csv("Data/BPI_quotes.csv")
+BES <- read.csv("Data/BES_quotes.csv")
+BCP <- read.csv("Data/BCP_quotes.csv")
+BANIF <- read.csv("Data/BANIF_quotes.csv")
 
 
 #Manipulating the data series (for BPI)
@@ -69,8 +69,8 @@ BANIF$BANIF_traded_volume <- BANIF$Close_BANIF * BANIF$Volume_BANIF
 
 #Creating the master dataframe for the VAR model
 Banks_quotes <- merge(x = BPI, y = BES, by = "Date", all.y = TRUE)
-Banks_quotes <- merge(x = Banks_quotes, y = BCP, by = "Date", all.y = TRUE)
-Banks_quotes <- merge(x = Banks_quotes, y = BANIF, by = "Date", all.y = TRUE)
+Banks_quotes <- merge(x = BCP, y = Banks_quotes, by = "Date", all.y = TRUE)
+Banks_quotes <- merge(x = BANIF, y = Banks_quotes, by = "Date", all.y = TRUE)
 
 
 #charting
