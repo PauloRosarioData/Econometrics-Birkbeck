@@ -1,7 +1,7 @@
 # README #
 
 Econometrics Paper for MSc Financial Economics at Birkbeck.
-
+Developed in R. 
 
 ### What is in this repository? ###
 
