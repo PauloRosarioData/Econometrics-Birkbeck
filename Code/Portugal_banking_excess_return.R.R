@@ -10,6 +10,7 @@
 library("vars")
 library('ggplot2')
 library("dynlm")
+library("DataCombine")
 
 
 #Load the data series
@@ -23,6 +24,7 @@ JM <- read.csv("Data/JM_quotes.csv")
 GALP <- read.csv("Data/GALP_quotes.csv")
 YIELDS <- read.csv("Data/Yields_quotes.csv")
 STOXX <- read.csv("Data/STOXX_quotes.csv")
+STOXXGENERAL <- read.csv("Data/STOXXGENERAL_quotes.csv")
 
 #Manipulating the data series (for Yields)
 YIELDS <- YIELDS[order(YIELDS$Date),]
@@ -116,6 +118,17 @@ colnames(STOXX)[7] <- "AdjClose_STOXX"
 STOXX$STOXX_var <- c(NA, diff(STOXX$AdjClose_STOXX)/STOXX$AdjClose_STOXX[-1])
 STOXX$STOXX_traded_volume <-STOXX$Close_STOXX *STOXX$Volume_STOXX
 
+#Manipulating the data series (forSTOXXGENERAL)
+STOXXGENERAL <-STOXXGENERAL[order(STOXXGENERAL$Date),]
+colnames(STOXXGENERAL)[2] <- "Open_STOXXGENERAL"
+colnames(STOXXGENERAL)[3] <- "High_STOXXGENERAL"
+colnames(STOXXGENERAL)[4] <- "Low_STOXXGENERAL"
+colnames(STOXXGENERAL)[5] <- "Close_STOXXGENERAL"
+colnames(STOXXGENERAL)[6] <- "Volume_STOXXGENERAL"
+colnames(STOXXGENERAL)[7] <- "AdjClose_STOXXGENERAL"
+STOXXGENERAL$STOXXGENERAL_var <- c(NA, diff(STOXXGENERAL$AdjClose_STOXXGENERAL)/STOXXGENERAL$AdjClose_STOXXGENERAL[-1])
+STOXXGENERAL$STOXXGENERAL_traded_volume <-STOXXGENERAL$Close_STOXXGENERAL *STOXXGENERAL$Volume_STOXXGENERAL
+
 
 
 
@@ -126,26 +139,49 @@ Banks_quotes <- merge(x = BCP, y = Banks_quotes, by = "Date", all.y = TRUE)
 Banks_quotes <- merge(x = BANIF, y = Banks_quotes, by = "Date", all.y = TRUE)
 Banks_quotes <- merge(x = EDP, y = Banks_quotes, by = "Date", all.y = TRUE)
 Banks_quotes <- merge(x = YIELDS, y = Banks_quotes, by = "Date", all.y = TRUE)
+Banks_quotes <- merge(x = JM, y = Banks_quotes, by = "Date", all.y = TRUE)
+Banks_quotes <- merge(x = GALP, y = Banks_quotes, by = "Date", all.y = TRUE)
 Banks_quotes <- merge(x = STOXX, y = Banks_quotes, by = "Date", all.y = TRUE)
+Banks_quotes <- merge(x = STOXXGENERAL, y = Banks_quotes, by = "Date", all.y = TRUE)
 
-Banks_quotes[is.na(Banks_quotes)] <- 0
+
 
 #creating the excess return variables
 Banks_quotes$BPI_ex_return <- Banks_quotes$BPI_var - Banks_quotes$STOXX_var
 Banks_quotes$BES_ex_return <- Banks_quotes$BES_var - Banks_quotes$STOXX_var
 Banks_quotes$BCP_ex_return <- Banks_quotes$BCP_var - Banks_quotes$STOXX_var
 Banks_quotes$BANIF_ex_return <- Banks_quotes$BANIF_var - Banks_quotes$STOXX_var
+Banks_quotes$EDP_ex_return <- Banks_quotes$EDP_var - Banks_quotes$STOXXGENERAL_var
+Banks_quotes$JM_ex_return <- Banks_quotes$JM_var - Banks_quotes$STOXXGENERAL_var
+Banks_quotes$GALP_ex_return <- Banks_quotes$GALP_var - Banks_quotes$STOXXGENERAL_var
 
-
-
+Banks_quotes[is.na(Banks_quotes)] <- 0
+Banks_quotes <- Banks_quotes[Banks_quotes$Date > 36528, ]
 
 #charting
 
 ggplot(Banks_quotes$BANIF_var) + geomline(aes(x=u,y=v))
-#diagnostic tests
+#lags (NOT WORKING)
+
+Banks_quotes <-Banks_quotes[order(Banks_quotes$Date),]
+Banks_quotes <- slide(Banks_quotes, Var = "BCP_ex_return", slideBy = -1)
+Banks_quotes <- slide(Banks_quotes, Var = "BCP_ex_return", slideBy = -2)
+Banks_quotes <- slide(Banks_quotes, Var = "BCP_ex_return", slideBy = -3)
+Banks_quotes <- slide(Banks_quotes, Var = "BPI_ex_return", slideBy = -1)
+Banks_quotes <- slide(Banks_quotes, Var = "BPI_ex_return", slideBy = -2)
+Banks_quotes <- slide(Banks_quotes, Var = "BPI_ex_return", slideBy = -3)
+Banks_quotes <- slide(Banks_quotes, Var = "PT_var", slideBy = -1)
+Banks_quotes <- slide(Banks_quotes, Var = "PT_var", slideBy = -2)
+Banks_quotes <- slide(Banks_quotes, Var = "PT_var", slideBy = -3)
 
 
 
 #VAR model
 Linear_Model <- lm(Banks_quotes$PT_var ~ Banks_quotes$BPI_ex_return + Banks_quotes$BES_ex_return +
-                   Banks_quotes$BCP_ex_return + Banks_quotes$BANIF_ex_return)
+                   Banks_quotes$BCP_ex_return + Banks_quotes$BANIF_ex_return +
+                   Banks_quotes$EDP_ex_return + Banks_quotes$GALP_ex_return +
+                   Banks_quotes$JM_ex_return + Banks_quotes$"BCP_ex_return-1" +
+                   Banks_quotes$"BCP_ex_return-2" + Banks_quotes$"BCP_ex_return-3" +
+                   Banks_quotes$"BPI_ex_return-1" + Banks_quotes$"BPI_ex_return-2" +
+                   Banks_quotes$"BPI_ex_return-3" + Banks_quotes$"PT_var-1" +
+                   Banks_quotes$"PT_var-2" + Banks_quotes$"PT_var-3")
