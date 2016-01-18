@@ -105,6 +105,18 @@ GALP$GALP_var <- c(NA, diff(GALP$AdjClose_GALP)/GALP$AdjClose_GALP[-1])
 GALP$GALP_traded_volume <-GALP$Close_GALP *GALP$Volume_GALP
 
 
+#Manipulating the data series (forSTOXX)
+STOXX <-STOXX[order(STOXX$Date),]
+colnames(STOXX)[2] <- "Open_STOXX"
+colnames(STOXX)[3] <- "High_STOXX"
+colnames(STOXX)[4] <- "Low_STOXX"
+colnames(STOXX)[5] <- "Close_STOXX"
+colnames(STOXX)[6] <- "Volume_STOXX"
+colnames(STOXX)[7] <- "AdjClose_STOXX"
+STOXX$STOXX_var <- c(NA, diff(STOXX$AdjClose_STOXX)/STOXX$AdjClose_STOXX[-1])
+STOXX$STOXX_traded_volume <-STOXX$Close_STOXX *STOXX$Volume_STOXX
+
+
 
 
 
@@ -114,8 +126,13 @@ Banks_quotes <- merge(x = BCP, y = Banks_quotes, by = "Date", all.y = TRUE)
 Banks_quotes <- merge(x = BANIF, y = Banks_quotes, by = "Date", all.y = TRUE)
 Banks_quotes <- merge(x = EDP, y = Banks_quotes, by = "Date", all.y = TRUE)
 Banks_quotes <- merge(x = YIELDS, y = Banks_quotes, by = "Date", all.y = TRUE)
+Banks_quotes <- merge(x = STOXX, y = Banks_quotes, by = "Date", all.y = TRUE)
 
 Banks_quotes[is.na(Banks_quotes)] <- 0
+
+
+
+
 #charting
 
 ggplot(Banks_quotes$BANIF_var) + geomline(aes(x=u,y=v))
@@ -126,4 +143,4 @@ ggplot(Banks_quotes$BANIF_var) + geomline(aes(x=u,y=v))
 #VAR model
 Linear_Model <- lm(Banks_quotes$PT_var ~ Banks_quotes$BCP_var + Banks_quotes$BPI_var +
                    Banks_quotes$BES_var + Banks_quotes$BANIF_var +
-                     Banks_quotes$EDP_var)
+                     Banks_quotes$EDP_var + Banks_quotes$STOXX_var)
