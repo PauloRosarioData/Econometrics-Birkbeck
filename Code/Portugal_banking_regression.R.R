@@ -22,10 +22,11 @@ EDP <- read.csv("Data/EDP_quotes.csv")
 JM <- read.csv("Data/JM_quotes.csv")
 GALP <- read.csv("Data/GALP_quotes.csv")
 YIELDS <- read.csv("Data/Yields_quotes.csv")
+STOXX <- read.csv("Data/STOXX_quotes.csv")
 
 #Manipulating the data series (for Yields)
 YIELDS <- YIELDS[order(YIELDS$Date),]
-YIELDS$PT_var <- c(NA, diff(YIELDS$PT)/ YIELDS$PT[-1])
+YIELDS$PT_var <- c(NA, diff(YIELDS$PT._spread)/ YIELDS$PT._spread[-1])
 
 #Manipulating the data series (for BPI)
 BPI <- BPI[order(BPI$Date),]
@@ -138,9 +139,10 @@ Banks_quotes[is.na(Banks_quotes)] <- 0
 ggplot(Banks_quotes$BANIF_var) + geomline(aes(x=u,y=v))
 #diagnostic tests
 
-
+Banks_quotes$BCP_Negative = ifelse(Banks_quotes$BCP_var > 0, 0, Banks_quotes$BCP_var)
+Banks_quotes$BCP_Positive = ifelse(Banks_quotes$BCP_var < 0, 0, Banks_quotes$BCP_var)
 
 #VAR model
-Linear_Model <- lm(Banks_quotes$PT_var ~ Banks_quotes$BCP_var + Banks_quotes$BPI_var +
+Linear_Model <- lm(Banks_quotes$PT_var ~ Banks_quotes$BCP_Negative + Banks_quotes$BCP_Positive + Banks_quotes$BPI_var +
                    Banks_quotes$BES_var + Banks_quotes$BANIF_var +
                      Banks_quotes$EDP_var + Banks_quotes$STOXX_var)

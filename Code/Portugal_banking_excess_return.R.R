@@ -175,10 +175,17 @@ Banks_quotes <- slide(Banks_quotes, Var = "PT_var", slideBy = -2)
 Banks_quotes <- slide(Banks_quotes, Var = "PT_var", slideBy = -3)
 
 
+Banks_quotes$BCP_Negative = ifelse(Banks_quotes$BCP_ex_return > 0, 0, -Banks_quotes$BCP_ex_return)
+Banks_quotes$BCP_Positive = ifelse(Banks_quotes$BCP_ex_return < 0, 0, Banks_quotes$BCP_ex_return)
+
+Banks_quotes$BPI_Negative = ifelse(Banks_quotes$BPI_ex_return > 0, 0, -Banks_quotes$BPI_ex_return)
+Banks_quotes$BPI_Positive = ifelse(Banks_quotes$BPI_ex_return < 0, 0, Banks_quotes$BPI_ex_return)
+
+
 
 #VAR model
-Linear_Model <- lm(Banks_quotes$PT_var ~ Banks_quotes$BPI_ex_return + Banks_quotes$BES_ex_return +
-                   Banks_quotes$BCP_ex_return + Banks_quotes$BANIF_ex_return +
+Linear_Model <- lm(Banks_quotes$PT_var ~ Banks_quotes$BPI_Negative + Banks_quotes$BPI_Positive + Banks_quotes$BES_ex_return +
+                   Banks_quotes$BCP_Negative + Banks_quotes$BCP_Positive + Banks_quotes$BANIF_ex_return +
                    Banks_quotes$EDP_ex_return + Banks_quotes$GALP_ex_return +
                    Banks_quotes$JM_ex_return + Banks_quotes$"BCP_ex_return-1" +
                    Banks_quotes$"BCP_ex_return-2" + Banks_quotes$"BCP_ex_return-3" +

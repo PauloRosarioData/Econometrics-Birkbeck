@@ -12,6 +12,8 @@ Developed in R.
 ### Developed ###
 * Basic Regression: A model where the dependent variable is the change on yields, and the independent is the return on individual stocks (Portugal_banking_regression.R)
 * Excess returns Regression: A model where the dependent variable is the change on yields, and the independent is the EXCESS return on individual stocks (Portugal_banking_regression.R)
+* (partially) let the returns have two different effects, return on positive impacts and returns on negative imapcts
+
 
 ### To develop ###
 
